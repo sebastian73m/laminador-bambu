@@ -104,7 +104,7 @@ npm run package
 
 Para incluir el motor real en las pruebas configura BAMBU_STUDIO_PATH antes de `npm test`. Sin esa variable solo se omite la prueba que requiere el binario; la lectura del ejemplo real sigue comprobándose.
 
-[Estado de verificación](docs/testing.md): se probó un laminado real en Linux, el protocolo MCP y el visor en Chromium. Windows, compilación C++ completa y ChatGPT Desktop real requieren comprobación en esos entornos; se entrega una plantilla de CI para Windows y Linux en docs/ci/github-actions.yml.
+[Estado de verificación](docs/testing.md): se probó un laminado real en Linux, el protocolo MCP y el visor en Chromium. Windows, compilación C++ completa y ChatGPT Desktop real requieren comprobación en esos entornos; GitHub Actions verifica el servidor y el visor en Windows y Linux.
 
 Licencia AGPL-3.0-only. Atribuciones y código correspondiente: [THIRD_PARTY.md](THIRD_PARTY.md).
 
@@ -114,4 +114,4 @@ Proyecto open source bajo AGPL-3.0-only. Consulta [CONTRIBUTING.md](CONTRIBUTING
 
 ## GitHub Actions
 
-La plantilla [docs/ci/github-actions.yml](docs/ci/github-actions.yml) verifica Windows y Linux. Para activarla, cópiala a `.github/workflows/ci.yml` con una credencial que tenga permiso `workflow` o desde la interfaz de GitHub. La credencial usada para crear este repositorio no permitía publicar workflows, por lo que la plantilla se conserva como ejemplo y Actions no está activado.
+El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) se ejecuta en cada push y pull request sobre Windows y Linux con Node.js 22. Comprueba TypeScript, ejecuta las pruebas, compila el servidor y el visor, verifica la interfaz con Chromium y genera un ZIP descargable por sistema. No instala Bambu Studio ni verifica la integración dentro de ChatGPT Desktop; la prueba de laminado nativo requiere `BAMBU_STUDIO_PATH`.
