@@ -1,4 +1,5 @@
 import type { PlatePreview, Segment, Vec3, Statistics } from "./types.js";
+import { detectSeams } from "./seams.js";
 export function parseDuration(value: string): number | null {
   const s = value.trim();
   if (/^\d+(?:\.\d+)?$/.test(s)) return Number(s);
@@ -285,6 +286,8 @@ export function parseGcode(text: string, maxSegments = 2000000): PlatePreview {
     while (end < segments.length && segments[end].layer === index) end++;
     return { index, z, start, end };
   });
+  const seams = detectSeams(segments, warnings);
+  for (const seam of seams) segments[seam.segmentIndex].seam = seam.position;
   return {
     id: 1,
     name: "Placa 1",
@@ -292,5 +295,6 @@ export function parseGcode(text: string, maxSegments = 2000000): PlatePreview {
     layers,
     statistics,
     warnings: [...warnings],
+    seams,
   };
 }

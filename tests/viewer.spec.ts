@@ -85,6 +85,15 @@ test("imports and displays the real Bambu 3MF with source statistics", async ({
   await expect(page.locator("#total-time")).toHaveText("11 min 50 s");
   await expect(page.locator("#weight")).toHaveText("2,11 g");
   await expect(page.locator("#layer-label")).toContainText("50 / 50");
+  await expect(page.locator("#seam-count")).toContainText("50 / 50");
+  const allPaths = await page.locator("#segment-count").textContent();
+  await page.locator("#seams").uncheck();
+  await expect(page.locator("#seam-count")).toContainText("0 / 50");
+  await expect(page.locator("#segment-count")).toHaveText(allPaths!);
+  await page.locator("#seams").check();
+  await page.locator("#single-layer").check();
+  await expect(page.locator("#seam-count")).toContainText("1 / 50");
+  await page.getByRole("button", { name: "Vista superior" }).click();
   await page.screenshot({
     path: join(tmpdir(), "laminador-real-preview.png"),
     fullPage: true,

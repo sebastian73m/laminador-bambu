@@ -1,4 +1,32 @@
-# Verificación de la versión 0.1.0
+# Verificación de la versión 0.1.1
+
+Fecha: 6 de octubre de 2026. Host Linux amd64, Node 22, Docker Engine 29.1.3, Compose 2.40.3; imagen Ubuntu 24.04 con Bambu Studio oficial v02.08.02.61 y Node 22. El checkout Windows y Docker Desktop descritos en el informe de instalación están en otro equipo.
+
+| Comprobación | Evidencia en este host |
+| --- | --- |
+| TypeScript y compilación | `npm run check`, `npm run build` |
+| Suite con motor real | 49 pruebas; proyecto de cubo sin G-code previo |
+| Suite dentro del contenedor | 49 pruebas como UID 1001 con `--configLoader runner` |
+| Visor Chromium | 4 pruebas; rotación/zoom/pan, capas, importación, iframe MCP App; costuras activadas/desactivadas y una sola capa |
+| Captura visual | `docs/assets/cordones-costuras.png`: cordones redondeados distinguibles y costura blanca en la capa superior |
+| Manifiestos de instalación | Generación Windows/Linux, schema y comando portable; parser real `plugin/read` en Codex 0.160.1 |
+| Integración del plugin Linux | App-server real: 12 herramientas, `toolsError: null`, recurso `ui://laminador/preview.html`; sin turno de modelo |
+| Docker y MCP | Contenedor healthy, usuario laminador, publicación loopback, capacidades retiradas; stdio y HTTP con motor disponible |
+| Laminado de diagnóstico | 50 capas, 3.840 segmentos, 50 costuras, 2,11 g; 291 s modelo y 710 s total |
+| Instalador | Ejecución con imagen construida localmente y `--skip-build`, generación de marketplace nuevo |
+| Persistencia | Resultado reabierto tras reinicio por stdio/HTTP; IDs de sesión caducan y archivos permanecen |
+| Paquete | ZIP con fuentes, compilación, Docker/Compose, instalación y licencias; CRC y extracción limpia comprobados |
+
+Las regresiones de ciclo de vida reproducen un motor activo con EOF y stdout roto; verifican que servidor y motor terminen. La revisión independiente detectó el problema de cierre y el inicio de contornos mixtos de voladizo/pared exterior; ambos fueron corregidos con pruebas que fallaron antes del cambio.
+
+Las costuras se infieren del cierre de paredes exteriores, siguiendo el umbral de 0,25 mm de la revisión inspeccionada. Las pruebas excluyen relleno, paredes interiores, contornos abiertos y variación de Z. Los 50 marcadores del ejemplo viajan en los bloques de geometría, no como coordenadas completas en cada resumen MCP.
+
+Las pruebas HTTP usan peticiones reales con Host no autorizado: `fetch` de Node normaliza Host, por lo que esa comprobación utiliza `node:http`. Se comprueba 403 ante Host/Origin ajenos y falta de token tanto en bind loopback como en bind de contenedor. El diagnóstico reproduce además el descubrimiento mediante el parser real de Codex; una conexión SDK aislada no sustituye esa comprobación.
+
+El informe de instalación previo confirma Docker Desktop Linux y MCP en el equipo Windows del usuario. En este host se reproduce Docker Linux y se comprueba el manifiesto Windows con el parser; no se ejecutan Docker Desktop, PowerShell ni `docker.exe` aquí. CI ejecuta servidor/visor en Windows y Linux, y Docker con motor real en Linux. La vista MCP App embebida real en ChatGPT Desktop sigue sin verificarse; el iframe de prueba y la captura del navegador no prueban esa integración. Tampoco se compiló Bambu Studio C++ desde cero, ni se probó Linux arm64/emulación.
+
+## Verificación inicial (0.1.0)
+
 
 Entorno: Ubuntu 26.04, Node.js 22.22.1, Chromium de Playwright con WebGL por software.
 

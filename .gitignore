@@ -11,5 +11,6 @@ test-results/
 *.zip
 
 artifacts/
+data/
 # Bambu CLI diagnostic produced by manual invocations
 result.json

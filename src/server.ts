@@ -7,6 +7,7 @@ import { resolve, join } from "node:path";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { readConfig } from "./config.js";
+import { readHttpConfig } from "./http-config.js";
 import { createService } from "./service.js";
 import { createMcpServer, callService } from "./tools.js";
 const config = readConfig();
@@ -16,23 +17,30 @@ const packageRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const htmlPath = join(packageRoot, "dist", "viewer", "index.html");
 await mkdir(config.projects, { recursive: true });
 await mkdir(config.jobs, { recursive: true });
+let shuttingDown = false;
 const shutdown = async () => {
+  if (shuttingDown) return;
+  shuttingDown = true;
   await service.jobs.shutdown();
   process.exit(0);
 };
 process.once("SIGTERM", () => void shutdown());
 process.once("SIGINT", () => void shutdown());
 if (process.argv.includes("--stdio")) {
+  // docker exec does not forward termination of its CLI as a signal to Node.
+  // EOF is the lifetime boundary of this MCP session, including active jobs.
+  process.stdin.once("end", () => void shutdown());
+  process.stdin.once("close", () => void shutdown());
+  process.stdin.once("error", () => void shutdown());
+  process.stdout.once("error", () => void shutdown());
   await createMcpServer(service, htmlPath).connect(new StdioServerTransport());
   console.error("Laminador MCP stdio listo");
 } else {
-  const port = Number(process.env.PORT ?? 4319);
-  if (!Number.isSafeInteger(port) || port < 1 || port > 65535)
-    throw Error("PORT inválido");
-  const web = createMcpExpressApp({ host: "127.0.0.1" });
+  const { host, port, allowedHosts } = readHttpConfig();
+  const web = createMcpExpressApp({ host, allowedHosts });
   const token = randomBytes(32).toString("base64url");
-  // Browser operations require same origin and a per-start token. MCP is loopback-only;
-  // connect it via an authenticated private tunnel, never an anonymous public forwarder.
+  // Browser operations require same origin and a per-start token. On Docker,
+  // Compose publishes on host loopback; native startup binds loopback directly.
   web.use((req, res, next) => {
     const origin = req.get("origin");
     if (
@@ -132,7 +140,7 @@ if (process.argv.includes("--stdio")) {
       res.status(400).json({ error: err.message });
     },
   );
-  const listener = web.listen(port, "127.0.0.1", () =>
+  const listener = web.listen(port, host, () =>
     console.error(
       `Visor: http://127.0.0.1:${port}\nMCP: http://127.0.0.1:${port}/mcp\nProyectos: ${config.projects}`,
     ),

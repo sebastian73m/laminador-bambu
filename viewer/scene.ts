@@ -25,12 +25,14 @@ export interface Filters {
   end: number;
   progress: number;
   travels: boolean;
+  seams: boolean;
   preparation: boolean;
   mode: string;
   hiddenRoles: Set<string>;
 }
 interface Batch {
-  mesh: THREE.InstancedMesh | THREE.LineSegments;
+  mesh: THREE.InstancedMesh | THREE.LineSegments | THREE.Points;
+  seam: boolean;
   indices: number[];
   layer: number;
   role: string;
@@ -50,11 +52,22 @@ export class ToolpathScene {
   private frame = 0;
   private dirty = true;
   private observer: ResizeObserver;
-  private box = new THREE.BoxGeometry(1, 1, 1);
+  // Elliptical bead: rounded cross-section gives each adjacent extrusion its
+  // own highlight and valley instead of one flat, merged horizontal surface.
+  private bead = new THREE.CylinderGeometry(0.5, 0.5, 1, 10, 1).rotateZ(
+    -Math.PI / 2,
+  );
   private solidMaterial = new THREE.MeshStandardMaterial({
-    roughness: 0.65,
+    roughness: 0.48,
     metalness: 0.03,
   });
+  private seamMaterial = new THREE.PointsMaterial({
+    color: "#ffffff",
+    size: 7,
+    sizeAttenuation: false,
+    depthWrite: false,
+  });
+  visibleSeams = 0;
   private travelMaterial = new THREE.LineBasicMaterial({
     color: "#69879a",
     transparent: true,
@@ -156,7 +169,7 @@ export class ToolpathScene {
       let mesh: Batch["mesh"];
       if (first.extruding) {
         const instanced = new THREE.InstancedMesh(
-          this.box,
+          this.bead,
           this.solidMaterial,
           g.segments.length,
         );
@@ -194,6 +207,7 @@ export class ToolpathScene {
       }
       const batch: Batch = {
         mesh,
+        seam: false,
         ...g,
         layer: first.layer,
         role: first.role,
@@ -202,6 +216,33 @@ export class ToolpathScene {
       };
       this.batches.push(batch);
       this.group.add(mesh);
+      const marked = g.segments
+        .map((s, i) => ({ s, index: g.indices[i] }))
+        .filter(({ s }) => s.seam);
+      if (marked.length) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(
+            marked.flatMap(({ s }) => [
+              s.seam![0],
+              s.seam![1],
+              s.seam![2] + 0.03,
+            ]),
+            3,
+          ),
+        );
+        const points = new THREE.Points(geometry, this.seamMaterial);
+        points.renderOrder = 1;
+        this.group.add(points);
+        this.batches.push({
+          ...batch,
+          mesh: points,
+          seam: true,
+          segments: marked.map(({ s }) => s),
+          indices: marked.map(({ index }) => index),
+        });
+      }
     }
     this.count = Math.max(this.count, offset + segments.length);
   }
@@ -209,12 +250,13 @@ export class ToolpathScene {
     this.dirty = true;
     const cutoff = Math.floor((this.count * filters.progress) / 100);
     let visible = 0;
+    this.visibleSeams = 0;
     for (const b of this.batches) {
       b.mesh.visible =
         b.layer >= filters.start &&
         b.layer <= filters.end &&
         !filters.hiddenRoles.has(b.role) &&
-        (b.extruding || filters.travels) &&
+        (b.seam ? filters.seams : b.extruding || filters.travels) &&
         (b.layer > 0 || filters.preparation);
       if (!b.mesh.visible) continue;
       let lo = 0,
@@ -224,9 +266,10 @@ export class ToolpathScene {
         if (b.indices[mid] < cutoff) lo = mid + 1;
         else hi = mid;
       }
-      visible += lo;
+      if (b.seam) this.visibleSeams += lo;
+      else visible += lo;
       if (b.mesh instanceof THREE.InstancedMesh) b.mesh.count = lo;
-      else b.mesh.geometry.setDrawRange(0, lo * 2);
+      else b.mesh.geometry.setDrawRange(0, lo * (b.seam ? 1 : 2));
     }
     return visible;
   }
@@ -287,9 +330,10 @@ export class ToolpathScene {
     this.observer.disconnect();
     this.controls.dispose();
     this.clear();
-    this.box.dispose();
+    this.bead.dispose();
     this.solidMaterial.dispose();
     this.travelMaterial.dispose();
+    this.seamMaterial.dispose();
     this.renderer.dispose();
   }
 }

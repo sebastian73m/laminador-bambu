@@ -152,6 +152,7 @@ function filters(): Filters {
     end,
     progress: Number(input("progress").value),
     travels: input("travels").checked,
+    seams: input("seams").checked,
     preparation: input("preparation").checked,
     mode: select("color-mode").value,
     hiddenRoles,
@@ -166,6 +167,8 @@ function update() {
   const visible = scene.apply(f);
   el("segment-count").textContent =
     `${visible.toLocaleString("es")} trayectorias visibles`;
+  el("seam-count").textContent =
+    `${scene.visibleSeams} / ${plate.seamCount ?? 0} costuras en las capas visibles`;
   el("layer-label").textContent =
     `${f.end} / ${Math.max(...plate.layers.map((l) => l.index))}`;
   el("start-label").textContent = String(f.start);
@@ -355,6 +358,7 @@ for (const id of [
   "layer-end",
   "progress",
   "travels",
+  "seams",
   "single-layer",
   "preparation",
 ])

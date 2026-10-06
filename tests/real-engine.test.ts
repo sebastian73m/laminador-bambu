@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, cp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { JobManager } from "../src/jobs.js";
-import { loadSlice } from "../src/artifacts.js";
+import { loadSlice, inspectArchive } from "../src/artifacts.js";
 import { probeEngine } from "../src/engine.js";
 it.skipIf(!process.env.BAMBU_STUDIO_PATH)(
   "slices the supplied 3MF with real Bambu Studio and reads its statistics",
@@ -23,9 +23,13 @@ it.skipIf(!process.env.BAMBU_STUDIO_PATH)(
     try {
       await mkdir(manager.config.projects);
       await cp(
-        resolve("examples/cubo-p2s-laminado.3mf"),
+        resolve("examples/cubo-p2s-proyecto.3mf"),
         join(manager.config.projects, "cubo.3mf"),
       );
+      expect(
+        (await inspectArchive(join(manager.config.projects, "cubo.3mf")))
+          .slicedPlates,
+      ).toEqual([]);
       expect((await probeEngine(manager.config.engine)).available).toBe(true);
       const job = await manager.start({ project: "cubo.3mf", plate: 0 });
       let result = manager.get(job.id);
@@ -58,4 +62,6 @@ it("reads the real checked-in Bambu artifact with exact source statistics", asyn
   expect(p.statistics.filaments[0].lengthMm).toBe(694.76);
   expect(p.statistics.filaments[0].volumeCm3).toBeCloseTo(1.67109);
   expect(p.layers.filter((l) => l.index > 0)).toHaveLength(50);
+  expect(p.seams).toHaveLength(50);
+  expect(p.segments.filter((s) => s.seam)).toHaveLength(50);
 });

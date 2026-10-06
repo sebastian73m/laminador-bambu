@@ -11,7 +11,11 @@ Laminador Bambu se distribuye bajo AGPL-3.0-only. LICENSE incluye el texto de la
 - Licencia: GNU Affero General Public License versión 3.
 - Integración: invocación del CLI, lectura de su formato de salida; no se hicieron modificaciones al motor y no se redistribuye su binario en el paquete del plugin.
 
+La imagen Docker construida con este repositorio sí contiene la AppImage oficial sin modificar, junto con sus recursos y avisos. Dockerfile fija la URL y SHA256. El código correspondiente del motor es el commit enlazado arriba; el código de la integración y los scripts de construcción se distribuyen en este repositorio y en el ZIP. Conserva estas referencias y los avisos de la AppImage al compartir la imagen.
+
 `examples/cubo.stl` fue generado para esta prueba: prisma de 20 × 20 × 10 mm. `examples/cubo-p2s-laminado.3mf` fue generado con Bambu Studio 02.08.02.61 y contiene perfiles completos de ejemplo de Bambu Lab P2S, proceso de 0,20 mm y Bambu PLA Basic. Es material de prueba del visor, no una recomendación de configuración para otra impresora.
+
+`examples/cubo-p2s-proyecto.3mf` conserva el modelo y los perfiles del mismo ejemplo, con G-code y estadísticas de laminado retirados. Se usa para comprobar que el motor genera un laminado nuevo.
 
 Los perfiles se obtuvieron de los ejemplos enlazados por la guía oficial del CLI:
 

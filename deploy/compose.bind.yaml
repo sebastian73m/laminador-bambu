@@ -1,0 +1,10 @@
+# Use absolute host directories. On Linux they must be writable by UID 1001.
+services:
+  laminador:
+    volumes:
+      - type: bind
+        source: ${LAMINADOR_PROJECTS_DIR:?Set LAMINADOR_PROJECTS_DIR to an absolute directory}
+        target: /projects
+      - type: bind
+        source: ${LAMINADOR_JOBS_DIR:?Set LAMINADOR_JOBS_DIR to an absolute directory}
+        target: /jobs

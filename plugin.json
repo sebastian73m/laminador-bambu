@@ -1,9 +1,11 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "laminador-bambu",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lamina proyectos 3MF con Bambu Studio local y explora trayectorias, capas, tiempos y filamento en 3D.",
-  "author": { "name": "Laminador Bambu contributors" },
+  "author": {
+    "name": "Laminador Bambu contributors"
+  },
   "extensions": {
     "com.openai": {
       "interface": {

@@ -361,6 +361,9 @@ h2 {
   border-radius: 2px;
   flex-shrink: 0;
 }
+.seam-swatch {
+  background: #fff;
+}
 #legend {
   margin-top: 16px;
 }

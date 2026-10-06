@@ -6,6 +6,10 @@ Plugin MCP con un visor 3D de trayectorias de impresión. Lamina proyectos 3MF u
 
 Primera versión de prueba para Windows y Linux. La navegación es una simulación propia; las trayectorias y estadísticas de un laminado real proceden de Bambu Studio.
 
+Los cordones tienen sección redondeada para distinguir líneas adyacentes en superficies horizontales. **Mostrar costuras** marca en blanco los cierres detectados de paredes exteriores y respeta capas, filtros y progreso. Se infieren de los contornos del G-code: no se garantiza una réplica de costuras scarf ni de la ventana nativa.
+
+![Cordones separados visualmente y costura blanca en una capa superior real](docs/assets/cordones-costuras.png)
+
 ![Vista previa de un laminado real con capas, trayectorias, tiempo y filamento](docs/assets/preview.png)
 
 ## Probar el visor ahora
@@ -23,6 +27,8 @@ Abre **http://127.0.0.1:4319**. **Probar demostración** muestra un jarrón sint
 El ejemplo tiene 50 capas, 2,11 g, 694,76 mm de filamento, 4 min 51 s del modelo y 11 min 50 s totales. Incluye perfiles P2S y PLA de prueba.
 
 ## Laminar tus proyectos
+
+También puedes instalar el motor y el servicio juntos con **Docker en Windows/Linux**, sin instalar Bambu Studio en el host. Consulta [instalación y diagnóstico Docker](docs/docker.md). El instalador genera un marketplace portable separado y mantiene la variante nativa.
 
 Instala Bambu Studio o compílalo desde su [código fuente fijado](docs/engine.md). Configura una **ruta absoluta al ejecutable CLI** y una carpeta de proyectos.
 
@@ -81,6 +87,7 @@ La variante HTTP ofrece Streamable HTTP en `http://127.0.0.1:4319/mcp`; solo esc
 | PROJECTS_DIR | `./projects` |
 | JOBS_DIR | `./.jobs` |
 | PORT | `4319` |
+| HTTP_BIND_HOST | `127.0.0.1`; `0.0.0.0` solo dentro del contenedor con publicación loopback |
 | SLICE_TIMEOUT_MS | `1800000` (30 minutos) |
 | MAX_CONCURRENT_JOBS | `1` |
 | MAX_JOBS | `20` por ejecución del servicio |
@@ -104,7 +111,7 @@ npm run package
 
 Para incluir el motor real en las pruebas configura BAMBU_STUDIO_PATH antes de `npm test`. Sin esa variable solo se omite la prueba que requiere el binario; la lectura del ejemplo real sigue comprobándose.
 
-[Estado de verificación](docs/testing.md): se probó un laminado real en Linux, el protocolo MCP y el visor en Chromium. Windows, compilación C++ completa y ChatGPT Desktop real requieren comprobación en esos entornos; GitHub Actions verifica el servidor y el visor en Windows y Linux.
+[Estado de verificación](docs/testing.md): se probó un laminado real en Linux, el protocolo MCP y el visor en Chromium. Docker/MCP y el parser del plugin se comprobaron en Linux; el informe de instalación Windows está documentado por separado. La compilación C++ completa y la vista embebida real de ChatGPT Desktop siguen pendientes; GitHub Actions verifica el servidor y el visor en Windows y Linux.
 
 Licencia AGPL-3.0-only. Atribuciones y código correspondiente: [THIRD_PARTY.md](THIRD_PARTY.md).
 
@@ -114,4 +121,4 @@ Proyecto open source bajo AGPL-3.0-only. Consulta [CONTRIBUTING.md](CONTRIBUTING
 
 ## GitHub Actions
 
-El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) se ejecuta en cada push y pull request sobre Windows y Linux con Node.js 22. Comprueba TypeScript, ejecuta las pruebas, compila el servidor y el visor, verifica la interfaz con Chromium y genera un ZIP descargable por sistema. No instala Bambu Studio ni verifica la integración dentro de ChatGPT Desktop; la prueba de laminado nativo requiere `BAMBU_STUDIO_PATH`.
+El workflow [.github/workflows/ci.yml](.github/workflows/ci.yml) se ejecuta en cada push y pull request sobre Windows y Linux con Node.js 22. Comprueba TypeScript, ejecuta las pruebas, compila el servidor y el visor, verifica la interfaz con Chromium y genera un ZIP descargable por sistema. Un job adicional en Linux construye el contenedor, ejecuta la suite con motor real como usuario sin privilegios y comprueba MCP stdio/HTTP y laminado. La integración con el app-server Codex se comprueba con el diagnóstico local opcional; la vista embebida real de ChatGPT Desktop sigue requiriendo prueba en ese host.

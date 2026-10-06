@@ -13,6 +13,7 @@ await stat(join(root, "dist/viewer/index.html"));
 await import("./collect-licenses.mjs");
 const allow = [
   ".gitignore",
+  ".gitattributes",
   "DEPENDENCY_LICENSES.txt",
   "plugin.json",
   "mcp.json",
@@ -28,6 +29,10 @@ const allow = [
   "vite.config.ts",
   "vitest.config.ts",
   "playwright.config.ts",
+  "Dockerfile",
+  ".dockerignore",
+  "compose.yaml",
+  "deploy",
   "src",
   "viewer",
   "scripts",

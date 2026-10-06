@@ -43,6 +43,7 @@ export interface Segment {
   extruding: boolean;
   width: number;
   height: number;
+  seam?: Vec3;
 }
 export interface FilamentUsage {
   tool: number;
@@ -72,15 +73,28 @@ export interface PlatePreview {
   layers: Layer[];
   statistics: Statistics;
   warnings: string[];
+  seams?: Seam[];
+}
+export interface Seam {
+  position: Vec3;
+  layer: number;
+  role: string;
+  tool: number;
+  segmentIndex: number;
 }
 export interface SliceResult {
   plates: PlatePreview[];
   warnings: string[];
 }
-export type PlateSummary = Omit<PlatePreview, "segments"> & {
+export type PlateSummary = Omit<PlatePreview, "segments" | "seams"> & {
   segmentCount: number;
+  seamCount: number;
 };
 export function summarizePlate(p: PlatePreview): PlateSummary {
-  const { segments, ...rest } = p;
-  return { ...rest, segmentCount: segments.length };
+  const { segments, seams, ...rest } = p;
+  return {
+    ...rest,
+    segmentCount: segments.length,
+    seamCount: seams?.length ?? 0,
+  };
 }

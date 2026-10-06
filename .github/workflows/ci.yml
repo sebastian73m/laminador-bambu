@@ -27,3 +27,22 @@ jobs:
         with:
           name: laminador-${{ matrix.os }}
           path: artifacts/*.zip
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: docker compose up --build --wait --wait-timeout 120
+      - run: docker compose exec -T laminador node node_modules/vitest/vitest.mjs run --configLoader runner
+      - run: node scripts/docker-doctor.mjs --slice
+      - run: node scripts/docker-plugin.mjs --output ./docker-plugin-linux
+      - run: node scripts/docker-plugin.mjs --output ./docker-plugin-windows --platform windows
+      - name: Container logs
+        if: always()
+        run: docker compose logs --no-color
+      - name: Stop test service
+        if: always()
+        run: docker compose down

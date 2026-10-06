@@ -1,0 +1,22 @@
+name: laminador-bambu
+services:
+  laminador:
+    image: laminador-bambu:0.1.1
+    platform: linux/amd64
+    build:
+      context: .
+    container_name: ${LAMINADOR_CONTAINER_NAME:-laminador-bambu}
+    init: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    ports:
+      - "127.0.0.1:4319:4319"
+    volumes:
+      - projects:/projects
+      - jobs:/jobs
+volumes:
+  projects:
+  jobs:
