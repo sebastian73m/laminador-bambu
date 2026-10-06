@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.worktrees/
+.superpowers/
+.engine/
+projects/
+.jobs/
+.env
+playwright-report/
+test-results/
+*.zip
+
+artifacts/
+# Bambu CLI diagnostic produced by manual invocations
+result.json

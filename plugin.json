@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "laminador-bambu",
+  "version": "0.1.0",
+  "description": "Lamina proyectos 3MF con Bambu Studio local y explora trayectorias, capas, tiempos y filamento en 3D.",
+  "author": { "name": "Laminador Bambu contributors" },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Laminador Bambu",
+        "shortDescription": "Laminado 3MF y rutas en 3D",
+        "longDescription": "Servicio local para Windows y Linux que usa Bambu Studio y ofrece un visor MCP App con navegación 3D, capas, trayectorias, tiempos estimados y consumo de filamento.",
+        "developerName": "Laminador Bambu contributors",
+        "category": "Productivity",
+        "capabilities": ["Interactive"],
+        "defaultPrompt": "Abre mi proyecto 3MF, lamínalo y muéstrame las trayectorias, el tiempo y el consumo de filamento."
+      }
+    }
+  }
+}

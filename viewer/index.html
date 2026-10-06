@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laminador · Vista previa 3D</title>
+  </head>
+  <body>
+    <div class="workspace">
+      <header>
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">▱</span>
+          <div>
+            <h1>Laminador</h1>
+            <span>Vista previa 3D · Bambu Studio</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="demo">Probar demostración</button
+          ><button id="fullscreen">Ampliar vista</button>
+        </div>
+      </header>
+      <section class="project-bar" aria-label="Proyecto">
+        <div class="project-input">
+          <label for="project-path">Proyecto 3MF</label
+          ><input
+            id="project-path"
+            list="projects-list"
+            placeholder="pieza.3mf · ruta dentro de tu carpeta"
+            autocomplete="off"
+          /><datalist id="projects-list"></datalist>
+        </div>
+        <label class="plate-input"
+          >Placa a laminar<select id="slice-plate">
+            <option value="0">Todas las placas</option>
+            <option value="1">Placa 1</option>
+            <option value="2">Placa 2</option>
+            <option value="3">Placa 3</option>
+          </select></label
+        >
+        <button id="open">Abrir laminado</button
+        ><button class="primary" id="slice">Laminar proyecto</button
+        ><button id="cancel" hidden>Cancelar</button>
+        <label class="upload" id="upload-label"
+          >Elegir archivo<input id="upload" type="file" accept=".3mf" hidden
+        /></label>
+      </section>
+      <div class="main">
+        <section class="viewport-panel" aria-label="Vista 3D">
+          <div class="viewport-toolbar">
+            <select
+              id="plate-select"
+              aria-label="Placa de vista previa"
+              disabled
+            >
+              <option>Sin laminado</option>
+            </select>
+            <div>
+              <button id="fit" title="Encuadrar">Encuadrar</button
+              ><button id="top" title="Vista superior">Vista superior</button>
+            </div>
+          </div>
+          <div id="viewport">
+            <div id="empty">
+              <div class="empty-shape" aria-hidden="true">▱</div>
+              <h2>Explora tu laminado</h2>
+              <p>
+                Abre un 3MF laminado o lamina un proyecto con sus perfiles de
+                Bambu Studio.
+              </p>
+              <button class="primary" id="empty-demo">
+                Probar el visor 3D
+              </button>
+            </div>
+            <div class="view-hint">
+              Arrastrar: rotar · Rueda: zoom · Botón derecho: desplazar
+            </div>
+            <div id="loading" hidden>Cargando trayectorias…</div>
+          </div>
+          <div class="timeline">
+            <div class="control-heading">
+              <label for="progress">Recorrido de la herramienta</label
+              ><output id="progress-label">100%</output>
+            </div>
+            <div class="progress-row">
+              <button id="play" aria-label="Reproducir trayectorias">▶</button
+              ><input
+                id="progress"
+                type="range"
+                min="0"
+                max="100"
+                value="100"
+                step="0.1"
+                disabled
+              />
+            </div>
+          </div>
+        </section>
+        <aside>
+          <section class="inspector-section">
+            <h2>Laminado</h2>
+            <div class="source" id="source">Sin datos</div>
+            <dl class="statistics">
+              <div>
+                <dt>Tiempo total estimado</dt>
+                <dd id="total-time">No disponible</dd>
+              </div>
+              <div>
+                <dt>Tiempo del modelo</dt>
+                <dd id="model-time">No disponible</dd>
+              </div>
+              <div>
+                <dt>Filamento utilizado</dt>
+                <dd id="weight">No disponible</dd>
+              </div>
+              <div>
+                <dt>Longitud de filamento</dt>
+                <dd id="length">No disponible</dd>
+              </div>
+            </dl>
+            <div id="filaments"></div>
+            <button id="download" hidden>Descargar 3MF laminado</button>
+          </section>
+          <section class="inspector-section">
+            <div class="control-heading">
+              <h2>Capas</h2>
+              <output id="layer-label">—</output>
+            </div>
+            <label class="range-label" for="layer-start"
+              >Desde la capa <output id="start-label">1</output></label
+            ><input
+              id="layer-start"
+              type="range"
+              min="1"
+              max="1"
+              value="1"
+              disabled
+            /><label class="range-label" for="layer-end"
+              >Hasta la capa <output id="end-label">1</output></label
+            ><input
+              id="layer-end"
+              type="range"
+              min="1"
+              max="1"
+              value="1"
+              disabled
+            /><label class="check"
+              ><input type="checkbox" id="single-layer" />Solo la capa
+              seleccionada</label
+            >
+            <div id="layer-height" class="muted">Altura: —</div>
+          </section>
+          <section class="inspector-section">
+            <h2>Trayectorias</h2>
+            <label for="color-mode" class="range-label">Colorear por</label
+            ><select id="color-mode">
+              <option value="role">Tipo de trayectoria</option>
+              <option value="tool">Filamento / herramienta</option>
+              <option value="speed">Velocidad</option></select
+            ><label class="check"
+              ><input type="checkbox" id="travels" />Mostrar
+              desplazamientos</label
+            ><label class="check"
+              ><input type="checkbox" id="preparation" />Mostrar
+              preparación</label
+            >
+            <div id="legend"></div>
+            <div id="speed-legend" hidden>
+              Azul: lento · Rojo: rápido (0–300 mm/s)
+            </div>
+          </section>
+        </aside>
+      </div>
+      <footer>
+        <span class="status-dot" aria-hidden="true"></span
+        ><span id="status" role="status" aria-live="polite"
+          >Abre un proyecto para comenzar.</span
+        ><span id="segment-count"></span>
+      </footer>
+      <details id="warnings" hidden>
+        <summary>Avisos del laminado y del visor</summary>
+        <ul id="warning-list"></ul>
+      </details>
+    </div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
