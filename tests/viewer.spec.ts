@@ -5,6 +5,8 @@ import { test, expect } from "@playwright/test";
 test("navigates 3D preview and filters actual rendered geometry", async ({
   page,
 }) => {
+  // Software WebGL on Windows CI takes longer for repeated full-canvas captures.
+  if (process.env.CI && process.platform === "win32") test.setTimeout(300000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/?demo=1");
