@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { zipFixture } from "./zip-fixture.js";
 
 it.each(["stdin EOF", "broken stdout"])(
@@ -30,7 +31,14 @@ it.each(["stdin EOF", "broken stdout"])(
     );
     const child = spawn(
       process.execPath,
-      ["--import", "tsx", "--import", preload, "src/server.ts", "--stdio"],
+      [
+        "--import",
+        "tsx",
+        "--import",
+        pathToFileURL(preload).href,
+        "src/server.ts",
+        "--stdio",
+      ],
       {
         env: {
           ...process.env,
@@ -42,6 +50,8 @@ it.each(["stdin EOF", "broken stdout"])(
       },
     );
     let enginePid: number | undefined;
+    let diagnostics = "";
+    child.stderr.on("data", (data) => (diagnostics += data));
     const exited = new Promise<number | null>((r) => child.once("exit", r));
     try {
       const send = (message: object) =>
@@ -69,6 +79,7 @@ it.each(["stdin EOF", "broken stdout"])(
       await expect
         .poll(
           async () => {
+            if (child.exitCode !== null) throw Error(diagnostics);
             try {
               enginePid = Number(await readFile(pidFile, "utf8"));
               return enginePid > 0;
