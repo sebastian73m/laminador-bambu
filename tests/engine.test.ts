@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtemp, mkdir, writeFile, symlink, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, symlink, rm, realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { resolveProject, makeSliceArgs, probeEngine } from "../src/engine.js";
@@ -31,7 +31,7 @@ describe("engine", () => {
   it("resolves project inside root", async () => {
     expect(
       await resolveProject(join(dir, "projects"), "pieza con espacios.3mf"),
-    ).toBe(join(dir, "projects", "pieza con espacios.3mf"));
+    ).toBe(await realpath(join(dir, "projects", "pieza con espacios.3mf")));
   });
   it("rejects traversal and non 3mf", async () => {
     await expect(
