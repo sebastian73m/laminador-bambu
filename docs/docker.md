@@ -32,7 +32,7 @@ codex plugin add laminador-bambu@laminador-local
 
 Estos comandos afectan solo al plugin y marketplace indicados; no borran los volúmenes Docker ni los 3MF. Si tu marketplace anterior tiene otro nombre, usa ese nombre al retirarlo.
 
-Reinicia/recarga el host después de instalar. La versión 0.1.1 permite distinguir este paquete del inicial. Si ya tienes una variante nativa del mismo plugin habilitada, conserva una sola variante activa para evitar confusión. La instalación local usa el formato documentado por [OpenAI](https://developers.openai.com/plugins/build/plugins). La vista MCP App embebida dentro de ChatGPT Desktop debe comprobarse en el host; ver el visor en un navegador o descubrir herramientas no demuestra por sí solo esa vista.
+Reinicia/recarga el host después de instalar. La versión 0.1.2 permite distinguir este paquete del inicial. Si ya tienes una variante nativa del mismo plugin habilitada, conserva una sola variante activa para evitar confusión. La instalación local usa el formato documentado por [OpenAI](https://developers.openai.com/plugins/build/plugins). La vista MCP App embebida dentro de ChatGPT Desktop debe comprobarse en el host; ver el visor en un navegador o descubrir herramientas no demuestra por sí solo esa vista.
 
 El paquete Docker contiene `plugin.json` con la identidad/extensions originales y `mcp.json` con `$schema`. El comando es el nombre simple `docker.exe` en Windows y `docker` en Linux, nunca una ruta absoluta a Program Files. Usa `exec -i` **sin `-t`** para mantener stdio MCP limpio. Docker debe estar en el PATH del proceso de ChatGPT/Codex, no solo en la terminal.
 

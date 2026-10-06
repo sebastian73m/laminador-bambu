@@ -1,3 +1,9 @@
+# Verificación de la versión 0.1.2
+
+La carga pide hasta cuatro bloques de 4.000 trayectorias en paralelo, conserva el orden del G-code y construye/filtra la geometría una sola vez. El modelo se muestra completo al finalizar; la reproducción se inicia únicamente al pulsar su botón. La interfaz ocupa todo el ancho y alto disponibles, con desplazamiento propio del inspector. En ventanas estrechas los controles siguen accesibles mediante desplazamiento.
+
+Verificado en Linux el 6 de octubre de 2026: TypeScript, compilación, formato, 48 pruebas del servidor (una prueba de motor nativo omitida) y cinco pruebas Chromium. La nueva regresión bloquea el primer bloque para comprobar concurrencia y ocultación del modelo parcial, confirma inicio al 100% sin reproducción y verifica el ajuste a 1280×720 y 1800×1080. La prueba MCP compara las dimensiones del área 3D con el navegador cuando el iframe tiene el mismo tamaño. El tamaño máximo del plugin sigue dependiendo del espacio que conceda el host; no se ha verificado este cambio dentro de ChatGPT Desktop real. Estas optimizaciones aceleran la carga de la vista previa; no modifican el tiempo que necesita Bambu para laminar.
+
 # Verificación de la versión 0.1.1
 
 Fecha: 6 de octubre de 2026. Host Linux amd64, Node 22, Docker Engine 29.1.3, Compose 2.40.3; imagen Ubuntu 24.04 con Bambu Studio oficial v02.08.02.61 y Node 22. El checkout Windows y Docker Desktop descritos en el informe de instalación están en otro equipo.

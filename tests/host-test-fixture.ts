@@ -1,7 +1,7 @@
 // Minimal MCP App host fixture: validates the postMessage transport without
 // pretending to be ChatGPT Desktop or to reproduce its sandbox policy.
 export function hostTestHtml(token: string) {
-  return `<!doctype html><html><body style="margin:0"><iframe title="Laminador MCP App" src="/" style="width:100%;height:1400px;border:0"></iframe><script>
+  return `<!doctype html><html><body style="margin:0"><iframe title="Laminador MCP App" src="/" style="width:100%;height:100dvh;border:0"></iframe><script>
 const frame=document.querySelector('iframe');
 window.addEventListener('message',async(event)=>{
  if(event.source!==frame.contentWindow)return;

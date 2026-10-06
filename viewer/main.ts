@@ -222,6 +222,7 @@ async function loadPlate(id: number) {
   if (!plate) throw Error("Placa no encontrada");
   if (!scene) scene = new ToolpathScene(el("viewport"));
   scene.clear();
+  el("viewport").setAttribute("aria-busy", "true");
   roles = new Set();
   hiddenRoles.clear();
   el("empty").hidden = true;
@@ -239,22 +240,39 @@ async function loadPlate(id: number) {
   warnings([...current.warnings, ...plate.warnings]);
   el("download").hidden = !current.jobId;
   try {
-    let offset: number | null = 0;
-    while (offset !== null) {
-      const data = await call("get_toolpath_chunk", {
-        previewId: current.previewId,
-        plate: id,
-        offset,
-        limit: 2000,
-      });
+    const previewId = current.previewId;
+    const segments: Segment[] = [];
+    const chunkSize = 4000;
+    for (let offset = 0; offset < plate.segmentCount; offset += chunkSize * 4) {
+      const offsets = Array.from(
+        { length: 4 },
+        (_, i) => offset + i * chunkSize,
+      ).filter((start) => start < plate!.segmentCount);
+      const chunks = await Promise.all(
+        offsets.map((start) =>
+          call("get_toolpath_chunk", {
+            previewId,
+            plate: id,
+            offset: start,
+            limit: chunkSize,
+          }),
+        ),
+      );
       if (version !== loadVersion) return;
-      scene.addChunk(data.segments as Segment[], offset);
-      for (const s of data.segments as Segment[]) roles.add(s.role);
-      offset = data.nextOffset as number | null;
-      status(`Cargando ${offset ?? data.total} / ${data.total} trayectorias…`);
-      update();
-      await new Promise((r) => requestAnimationFrame(r));
+      // Preserve G-code order even when requests finish out of order.
+      for (const chunk of chunks) {
+        for (const segment of chunk.segments as Segment[]) {
+          segments.push(segment);
+          roles.add(segment.role);
+        }
+      }
+      status(
+        `Cargando ${segments.length} / ${plate.segmentCount} trayectorias…`,
+      );
     }
+    // Build and filter once, rather than reprocessing every previously loaded
+    // batch and rendering a partial model after each network round trip.
+    scene.addChunk(segments, 0);
     scene.color(select("color-mode").value, plate);
     scene.fit();
     legend();
@@ -264,7 +282,10 @@ async function loadPlate(id: number) {
       `${plate.segmentCount.toLocaleString("es")} trayectorias cargadas${current.demo ? " · demostración sintética" : ""}.`,
     );
   } finally {
-    if (version === loadVersion) el("loading").hidden = true;
+    if (version === loadVersion) {
+      el("loading").hidden = true;
+      el("viewport").setAttribute("aria-busy", "false");
+    }
   }
 }
 async function showPreview(data: Record<string, unknown>) {
@@ -478,7 +499,7 @@ async function init() {
       await projects();
     } else {
       app = new App(
-        { name: "Laminador 3D", version: "0.1.0" },
+        { name: "Laminador 3D", version: "0.1.2" },
         {},
         { autoResize: true },
       );

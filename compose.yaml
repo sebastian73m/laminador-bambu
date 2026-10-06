@@ -1,7 +1,7 @@
 name: laminador-bambu
 services:
   laminador:
-    image: laminador-bambu:0.1.1
+    image: laminador-bambu:0.1.2
     platform: linux/amd64
     build:
       context: .

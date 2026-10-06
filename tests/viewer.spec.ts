@@ -120,4 +120,74 @@ test("renders the same viewer through the MCP App iframe transport", async ({
   );
   await expect(frame.locator("canvas")).toBeVisible();
   await expect(frame.locator("#source")).toContainText("demostración");
+  const embedded = (await frame.locator("#viewport").boundingBox())!;
+  await page.goto("/?demo=1");
+  await expect(page.locator("#status")).toContainText("trayectorias cargadas");
+  const browser = (await page.locator("#viewport").boundingBox())!;
+  expect(Math.abs(embedded.width - browser.width)).toBeLessThan(2);
+  expect(Math.abs(embedded.height - browser.height)).toBeLessThan(2);
+});
+
+test("loads ordered chunks concurrently and shows the complete preview at once", async ({
+  page,
+}) => {
+  const requests: number[] = [];
+  let releaseFirst!: () => void;
+  const firstGate = new Promise<void>((resolve) => {
+    releaseFirst = resolve;
+  });
+  await page.route("**/api/tool", async (route) => {
+    const body = route.request().postDataJSON();
+    if (body.name !== "get_toolpath_chunk") return route.continue();
+    requests.push(body.arguments.offset);
+    expect(body.arguments.limit).toBe(4000);
+    if (body.arguments.offset === 0) await firstGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+  try {
+    await page.goto("/?demo=1");
+    await expect.poll(() => requests.length).toBeGreaterThan(1);
+    await expect(page.locator("#viewport")).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+    await expect(page.locator("canvas")).toBeHidden();
+  } finally {
+    releaseFirst();
+  }
+  await expect(page.locator("#status")).toContainText("trayectorias cargadas");
+  await expect(page.locator("canvas")).toBeVisible();
+  await expect(page.locator("#progress")).toHaveValue("100");
+  await expect(page.locator("#play")).toHaveAttribute(
+    "aria-label",
+    "Reproducir trayectorias",
+  );
+  const heights: number[] = [];
+  for (const size of [
+    { width: 1280, height: 720 },
+    { width: 1800, height: 1080 },
+  ]) {
+    await page.setViewportSize(size);
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Math.round(
+            document.querySelector(".workspace")!.getBoundingClientRect()
+              .height,
+          ),
+        ),
+      )
+      .toBe(size.height);
+    const box = (await page.locator("canvas").boundingBox())!;
+    heights.push(box.height);
+    expect(box.width).toBeGreaterThan(size.width - 350);
+    expect(box.y + box.height).toBeLessThan(size.height);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight <= innerHeight,
+      ),
+    ).toBe(true);
+  }
+  expect(heights[1]).toBeGreaterThan(heights[0] + 300);
 });
