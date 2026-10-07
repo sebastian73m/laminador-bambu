@@ -38,6 +38,10 @@ export function createService(config: Config) {
       throw Error(
         "Vista previa no encontrada o caducada; vuelve a abrir el proyecto",
       );
+    // Refresh recency on reuse/chunk access. Creation order alone can evict a
+    // preview we just returned to a chat when the next invocation opens a file.
+    previews.delete(id);
+    previews.set(id, p);
     return p;
   };
   return {

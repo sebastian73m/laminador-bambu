@@ -32,9 +32,30 @@ codex plugin add laminador-bambu@laminador-local
 
 Estos comandos afectan solo al plugin y marketplace indicados; no borran los volúmenes Docker ni los 3MF. Si tu marketplace anterior tiene otro nombre, usa ese nombre al retirarlo.
 
-Reinicia/recarga el host después de instalar. La versión 0.1.2 permite distinguir este paquete del inicial. Si ya tienes una variante nativa del mismo plugin habilitada, conserva una sola variante activa para evitar confusión. La instalación local usa el formato documentado por [OpenAI](https://developers.openai.com/plugins/build/plugins). La vista MCP App embebida dentro de ChatGPT Desktop debe comprobarse en el host; ver el visor en un navegador o descubrir herramientas no demuestra por sí solo esa vista.
+Reinicia/recarga el host después de instalar. La versión 0.1.3 permite distinguir este paquete del inicial. Si ya tienes una variante nativa del mismo plugin habilitada, conserva una sola variante activa para evitar confusión. La instalación local usa el formato documentado por [OpenAI](https://developers.openai.com/plugins/build/plugins). La vista MCP App embebida dentro de ChatGPT Desktop debe comprobarse en el host; ver el visor en un navegador o descubrir herramientas no demuestra por sí solo esa vista.
 
 El paquete Docker contiene `plugin.json` con la identidad/extensions originales y `mcp.json` con `$schema`. El comando es el nombre simple `docker.exe` en Windows y `docker` en Linux, nunca una ruta absoluta a Program Files. Usa `exec -i` **sin `-t`** para mantener stdio MCP limpio. Docker debe estar en el PATH del proceso de ChatGPT/Codex, no solo en la terminal.
+
+## Actualizar el servicio y el visor
+
+El contenedor sirve el visor compilado en `dist/viewer/index.html`. Editar fuentes en el host o ejecutar `docker compose restart` no cambia lo que contiene la imagen. Desde el checkout que incluya los cambios, sin un laminado en curso:
+
+```bash
+docker compose up --build --force-recreate --wait
+node scripts/docker-doctor.mjs
+```
+
+Compose conserva los volúmenes nombrados de proyectos y resultados. Recrear el servicio termina sus sesiones y sus identificadores en memoria: guarda los resultados que quieras recuperar y sigue [Persistencia y sesiones](#persistencia-y-sesiones). Si usas bind mounts, ejecuta el mismo comando con `-f compose.yaml -f deploy/compose.bind.yaml`.
+
+Cierra y vuelve a abrir la conexión del plugin y recarga el navegador lateral para que usen el HTML nuevo. Si también cambia el paquete/manifiesto, genera una carpeta nueva de marketplace y reinstala solo ese plugin siguiendo los comandos anteriores. Los ajustes de actualización del laminado, recuperación WebGL y paneles colapsables están incluidos en 0.1.3: reconstruir un checkout anterior no los añade. Actualiza el checkout a esa versión antes de reconstruir.
+
+### Comprobar los cambios en el equipo instalado
+
+1. Abre un laminado, modifica el proyecto, vuelve a laminar y abre el nuevo `jobId` en la misma sesión. Deben cambiar geometría, capas y estadísticas cuando el resultado sea diferente.
+2. Cierra/abre el navegador lateral y cambia su tamaño. El área 3D debe seguir visible y responder a rotación y zoom. Pliega y despliega los paneles con **Proyecto ▴/▾** y **Datos ▸/◂**: sus botones deben seguir accesibles, el visor debe ocupar el espacio libre y los filtros deben conservarse.
+3. Activa **Solo la capa seleccionada** en una superficie horizontal y acerca: los cordones paralelos deben distinguirse por su relieve. Comprueba también **Mostrar costuras**.
+
+Si las estadísticas siguen presentes y solo desaparece el modelo, informa del ciclo de apertura/ocultación y cualquier error del visor. Si aparece “vista previa caducada” o “trabajo no encontrado”, comprueba que no cambió la sesión del servicio o se reinició el contenedor. Los diagnósticos y las [pruebas locales](testing.md) no sustituyen estas comprobaciones en ChatGPT Desktop.
 
 ## Diagnóstico y pruebas reales
 

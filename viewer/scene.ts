@@ -80,6 +80,10 @@ export class ToolpathScene {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.prepend(this.renderer.domElement);
+    this.renderer.domElement.addEventListener(
+      "webglcontextrestored",
+      this.refresh,
+    );
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.addEventListener("change", () => {
       this.dirty = true;
@@ -119,8 +123,15 @@ export class ToolpathScene {
       e.preventDefault(),
     );
   }
+  refresh = () => {
+    this.resize();
+    this.dirty = true;
+  };
   private resize() {
     const { width, height } = this.container.getBoundingClientRect();
+    // Side panels can temporarily measure zero while being hidden or moved.
+    // Keep the last usable drawing buffer and camera until they become visible.
+    if (width <= 0 || height <= 0) return;
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / Math.max(height, 1);
     this.camera.updateProjectionMatrix();
@@ -334,6 +345,10 @@ export class ToolpathScene {
     this.solidMaterial.dispose();
     this.travelMaterial.dispose();
     this.seamMaterial.dispose();
+    this.renderer.domElement.removeEventListener(
+      "webglcontextrestored",
+      this.refresh,
+    );
     this.renderer.dispose();
   }
 }

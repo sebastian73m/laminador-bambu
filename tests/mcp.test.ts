@@ -86,3 +86,51 @@ it("reports invalid identifiers as useful tool errors", async () => {
   expect(r.isError).toBe(true);
   expect(JSON.stringify(r.content)).toContain("no encontrado");
 });
+
+it("keeps a recently reused preview when the three-view cache is full", async () => {
+  const demo = await client.callTool({ name: "open_demo", arguments: {} });
+  const id = (demo.structuredContent as { previewId: string }).previewId;
+  for (let i = 0; i < 2; i++)
+    await client.callTool({
+      name: "open_preview",
+      arguments: { project: "sliced.3mf" },
+    });
+  const reused = await client.callTool({ name: "open_demo", arguments: {} });
+  expect(reused.structuredContent).toMatchObject({ previewId: id });
+  await client.callTool({
+    name: "open_preview",
+    arguments: { project: "sliced.3mf" },
+  });
+  const chunk = await client.callTool({
+    name: "get_toolpath_chunk",
+    arguments: { previewId: id, plate: 1, offset: 0, limit: 1 },
+  });
+  expect(chunk.isError).not.toBe(true);
+  expect(
+    (chunk.structuredContent as { segments: unknown[] }).segments,
+  ).toHaveLength(1);
+});
+
+it("rereads the G-code when a project is modified under the same filename", async () => {
+  const first = await client.callTool({
+    name: "open_preview",
+    arguments: { project: "sliced.3mf" },
+  });
+  await writeFile(
+    join(dir, "projects", "sliced.3mf"),
+    zipFixture({ "Metadata/plate_1.gcode": "G1 X1 E1\nG1 X2 E2\nG1 X3 E3" }),
+  );
+  const second = await client.callTool({
+    name: "open_preview",
+    arguments: { project: "sliced.3mf" },
+  });
+  const id = (second.structuredContent as { previewId: string }).previewId;
+  expect(id).not.toBe(
+    (first.structuredContent as { previewId: string }).previewId,
+  );
+  const chunk = await client.callTool({
+    name: "get_toolpath_chunk",
+    arguments: { previewId: id, plate: 1, offset: 0, limit: 10 },
+  });
+  expect(chunk.structuredContent).toMatchObject({ total: 3 });
+});

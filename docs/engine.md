@@ -72,7 +72,7 @@ Las instrucciones de preparación específicas del firmware, homing, rutinas de 
 
 ## Cordones y costuras
 
-El visor representa cada extrusión con sección elíptica redondeada, usando LINE_WIDTH/LAYER_HEIGHT del G-code. Las luces permiten distinguir cordones contiguos sin reducir artificialmente su anchura ni alterar la trayectoria.
+El visor representa cada extrusión con sección elíptica redondeada, usando LINE_WIDTH/LAYER_HEIGHT del G-code. Las luces permiten distinguir cordones contiguos sin reducir artificialmente su anchura ni alterar la trayectoria. Para revisar líneas paralelas de una superficie horizontal, selecciona su capa, activa **Solo la capa seleccionada**, pulsa **Vista superior** y acerca con la rueda. [Captura del detalle actual](assets/lineas-paralelas-zoom.png).
 
 La AppImage probada no emite etiquetas SEAM en el ejemplo. Se detecta el cierre de una extrusión exterior continua cuyos extremos distan menos de 0,25 mm, mostrando la posición media de ambos extremos. Este umbral procede de `GCodeProcessor.cpp` de la revisión fijada (detector `m_seams_detector`); el detector del visor excluye paredes abiertas, rellenos, preparación y trazados que cambian de Z. La marca viaja en el bloque del segmento correspondiente y no carga todas las coordenadas en el resumen MCP. Las costuras scarf/espirales y algoritmos futuros del motor no se emulan completamente; una marca indica un cierre inferido del G-code, no una medición del defecto físico.
 

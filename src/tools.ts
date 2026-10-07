@@ -87,7 +87,7 @@ export async function callService(
   }
 }
 export function createMcpServer(service: Service, htmlPath: string): McpServer {
-  const server = new McpServer({ name: "laminador-bambu", version: "0.1.0" });
+  const server = new McpServer({ name: "laminador-bambu", version: "0.1.3" });
   const descriptions: Record<ToolName, string> = {
     engine_status:
       "Comprueba que el CLI configurado de Bambu Studio está disponible.",

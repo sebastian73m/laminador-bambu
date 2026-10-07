@@ -7,44 +7,46 @@
   </head>
   <body>
     <div class="workspace">
-      <header>
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">▱</span>
-          <div>
-            <h1>Laminador</h1>
-            <span>Vista previa 3D · Bambu Studio</span>
+      <div id="top-controls" class="top-controls">
+        <header>
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true">▱</span>
+            <div>
+              <h1>Laminador</h1>
+              <span>Vista previa 3D · Bambu Studio</span>
+            </div>
           </div>
-        </div>
-        <div class="header-actions">
-          <button id="demo">Probar demostración</button
-          ><button id="fullscreen">Ampliar vista</button>
-        </div>
-      </header>
-      <section class="project-bar" aria-label="Proyecto">
-        <div class="project-input">
-          <label for="project-path">Proyecto 3MF</label
-          ><input
-            id="project-path"
-            list="projects-list"
-            placeholder="pieza.3mf · ruta dentro de tu carpeta"
-            autocomplete="off"
-          /><datalist id="projects-list"></datalist>
-        </div>
-        <label class="plate-input"
-          >Placa a laminar<select id="slice-plate">
-            <option value="0">Todas las placas</option>
-            <option value="1">Placa 1</option>
-            <option value="2">Placa 2</option>
-            <option value="3">Placa 3</option>
-          </select></label
-        >
-        <button id="open">Abrir laminado</button
-        ><button class="primary" id="slice">Laminar proyecto</button
-        ><button id="cancel" hidden>Cancelar</button>
-        <label class="upload" id="upload-label"
-          >Elegir archivo<input id="upload" type="file" accept=".3mf" hidden
-        /></label>
-      </section>
+          <div class="header-actions">
+            <button id="demo">Probar demostración</button
+            ><button id="fullscreen">Ampliar vista</button>
+          </div>
+        </header>
+        <section class="project-bar" aria-label="Proyecto">
+          <div class="project-input">
+            <label for="project-path">Proyecto 3MF</label
+            ><input
+              id="project-path"
+              list="projects-list"
+              placeholder="pieza.3mf · ruta dentro de tu carpeta"
+              autocomplete="off"
+            /><datalist id="projects-list"></datalist>
+          </div>
+          <label class="plate-input"
+            >Placa a laminar<select id="slice-plate">
+              <option value="0">Todas las placas</option>
+              <option value="1">Placa 1</option>
+              <option value="2">Placa 2</option>
+              <option value="3">Placa 3</option>
+            </select></label
+          >
+          <button id="open">Abrir laminado</button
+          ><button class="primary" id="slice">Laminar proyecto</button
+          ><button id="cancel" hidden>Cancelar</button>
+          <label class="upload" id="upload-label"
+            >Elegir archivo<input id="upload" type="file" accept=".3mf" hidden
+          /></label>
+        </section>
+      </div>
       <div class="main">
         <section class="viewport-panel" aria-label="Vista 3D">
           <div class="viewport-toolbar">
@@ -58,6 +60,22 @@
             <div>
               <button id="fit" title="Encuadrar">Encuadrar</button
               ><button id="top" title="Vista superior">Vista superior</button>
+              <button
+                id="toggle-top"
+                aria-controls="top-controls"
+                aria-expanded="true"
+                aria-label="Ocultar panel superior"
+              >
+                Proyecto ▴
+              </button>
+              <button
+                id="toggle-inspector"
+                aria-controls="inspector"
+                aria-expanded="true"
+                aria-label="Ocultar panel lateral"
+              >
+                Datos ▸
+              </button>
             </div>
           </div>
           <div id="viewport">
@@ -77,25 +95,8 @@
             </div>
             <div id="loading" hidden>Cargando trayectorias…</div>
           </div>
-          <div class="timeline">
-            <div class="control-heading">
-              <label for="progress">Recorrido de la herramienta</label
-              ><output id="progress-label">100%</output>
-            </div>
-            <div class="progress-row">
-              <input
-                id="progress"
-                type="range"
-                min="0"
-                max="100"
-                value="100"
-                step="0.1"
-                disabled
-              />
-            </div>
-          </div>
         </section>
-        <aside>
+        <aside id="inspector" aria-label="Datos y filtros del laminado">
           <section class="inspector-section">
             <h2>Laminado</h2>
             <div class="source" id="source">Sin datos</div>

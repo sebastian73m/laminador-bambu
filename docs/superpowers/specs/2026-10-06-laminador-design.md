@@ -1,5 +1,7 @@
 # Laminador para ChatGPT — diseño propuesto
 
+> Documento histórico del diseño y plan iniciales del 6 de octubre de 2026. Sus referencias al progreso de trayectorias y a verificaciones pendientes describen esa etapa. La barra de recorrido y la animación se eliminaron posteriormente; el visor actual carga el modelo completo y permite plegar los paneles. Consulta el [README actual](../../../README.md) y el [estado de verificación](../../testing.md).
+
 Estado: primera versión implementada y verificada en Linux; conexión a ChatGPT Desktop y ejecución en Windows pendientes de prueba en esos entornos.
 
 ## Aclaración acordada

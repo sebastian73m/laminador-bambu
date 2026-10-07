@@ -148,7 +148,7 @@ function filters(): Filters {
       ? end
       : Number(input("layer-start").value),
     end,
-    progress: Number(input("progress").value),
+    progress: 100,
     travels: input("travels").checked,
     seams: input("seams").checked,
     preparation: input("preparation").checked,
@@ -171,7 +171,6 @@ function update() {
     `${f.end} / ${Math.max(...plate.layers.map((l) => l.index))}`;
   el("start-label").textContent = String(f.start);
   el("end-label").textContent = String(f.end);
-  el("progress-label").textContent = `${Math.round(f.progress)}%`;
   const z = plate.layers.find((l) => l.index === f.end)?.z;
   el("layer-height").textContent =
     `Altura Z: ${z !== undefined ? amount(z, "mm") : "—"}`;
@@ -225,8 +224,6 @@ async function loadPlate(id: number) {
   }
   input("layer-start").value = "1";
   input("layer-end").value = String(max);
-  input("progress").value = "100";
-  input("progress").disabled = true;
   statistics(plate);
   warnings([...current.warnings, ...plate.warnings]);
   el("download").hidden = !current.jobId;
@@ -267,11 +264,12 @@ async function loadPlate(id: number) {
     scene.color(select("color-mode").value, plate);
     scene.fit();
     legend();
-    input("progress").disabled = false;
     update();
     status(
       `${plate.segmentCount.toLocaleString("es")} trayectorias cargadas${current.demo ? " · demostración sintética" : ""}.`,
     );
+  } catch (e) {
+    if (version === loadVersion) throw e;
   } finally {
     if (version === loadVersion) {
       el("loading").hidden = true;
@@ -280,6 +278,10 @@ async function loadPlate(id: number) {
   }
 }
 async function showPreview(data: Record<string, unknown>) {
+  // A new preview supersedes any older job still polling or opening its result.
+  ++pollVersion;
+  jobId = undefined;
+  busy(false);
   current = data as unknown as Preview;
   const options = current.plates.map((p) => {
     const o = document.createElement("option");
@@ -316,13 +318,16 @@ async function watchJob(id: string) {
       if (version !== pollVersion) return;
       status(String(j.message));
       if (j.state === "completed") {
-        await showPreview(await call("open_preview", { jobId: id }));
-        return;
+        const data = await call("open_preview", { jobId: id });
+        if (version !== pollVersion) return;
+        return showPreview(data);
       }
       if (j.state === "failed" || j.state === "cancelled")
         throw Error(String(j.message));
       await new Promise((r) => setTimeout(r, 1000));
     }
+  } catch (e) {
+    if (version === pollVersion) throw e;
   } finally {
     if (version === pollVersion) {
       busy(false);
@@ -352,6 +357,30 @@ on("slice", async () => {
 on("cancel", async () => {
   if (jobId) await call("cancel_job", { jobId });
 });
+function togglePanel(buttonId: string, panelId: string, name: string) {
+  const panel = el(panelId);
+  panel.hidden = !panel.hidden;
+  const button = el(buttonId);
+  button.setAttribute("aria-expanded", String(!panel.hidden));
+  button.setAttribute(
+    "aria-label",
+    `${panel.hidden ? "Mostrar" : "Ocultar"} panel ${name}`,
+  );
+  button.textContent =
+    panelId === "inspector"
+      ? `Datos ${panel.hidden ? "◂" : "▸"}`
+      : `Proyecto ${panel.hidden ? "▾" : "▴"}`;
+  if (panelId === "inspector")
+    el("inspector")
+      .closest(".main")!
+      .classList.toggle("inspector-collapsed", panel.hidden);
+  // Resize the existing scene; keep camera, layers and loaded geometry intact.
+  scene?.refresh();
+}
+on("toggle-top", () => togglePanel("toggle-top", "top-controls", "superior"));
+on("toggle-inspector", () =>
+  togglePanel("toggle-inspector", "inspector", "lateral"),
+);
 on("fit", () => scene?.fit());
 on("top", () => scene?.fit(true));
 on("fullscreen", async () => {
@@ -368,7 +397,6 @@ select("plate-select").addEventListener("change", () =>
 for (const id of [
   "layer-start",
   "layer-end",
-  "progress",
   "travels",
   "seams",
   "single-layer",
@@ -450,7 +478,10 @@ input("upload").addEventListener("change", async () => {
 async function handleResult(data: Record<string, unknown> | undefined) {
   if (!data) return;
   if (data.previewId) await showPreview(data);
-  else if (data.id && data.state) await watchJob(String(data.id));
+  else if (data.id && data.state) {
+    ++loadVersion;
+    await watchJob(String(data.id));
+  }
 }
 async function init() {
   if (local) {
@@ -460,27 +491,38 @@ async function init() {
       await showPreview(await call("open_demo"));
   } else {
     if (openai) {
-      await handleResult(openai.toolOutput);
       window.addEventListener("openai:set_globals", (event) => {
         const detail = (event as CustomEvent).detail;
+        scene?.refresh();
         void handleResult(detail?.globals?.toolOutput).catch(error);
       });
+      // Subscribe before the first asynchronous load: later tool results can
+      // arrive while its chunks/job are still being fetched.
+      await handleResult(openai.toolOutput);
       await projects();
     } else {
       app = new App(
-        { name: "Laminador 3D", version: "0.1.2" },
+        { name: "Laminador 3D", version: "0.1.3" },
         {},
         { autoResize: true },
       );
       app.ontoolresult = (result) => {
         void handleResult(result.structuredContent).catch(error);
       };
+      app.onhostcontextchanged = () => scene?.refresh();
       await app.connect();
       await projects();
     }
   }
 }
-window.addEventListener("pagehide", () => {
+window.addEventListener("pageshow", () => scene?.refresh());
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") scene?.refresh();
+});
+window.addEventListener("pagehide", (event) => {
+  // A persisted page is suspended, not destroyed. Its scene and in-flight
+  // state must remain usable when the side browser restores the same page.
+  if (event.persisted) return;
   ++loadVersion;
   ++pollVersion;
   scene?.dispose();

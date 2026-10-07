@@ -95,8 +95,7 @@ select:focus-visible,
   flex-direction: column;
   overflow: hidden;
 }
-.workspace > header,
-.workspace > .project-bar,
+.workspace > .top-controls,
 .workspace > footer,
 .workspace > details {
   flex-shrink: 0;
@@ -175,6 +174,9 @@ h1 {
   flex: 1;
   min-height: 0;
 }
+.main.inspector-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
 .viewport-panel {
   display: flex;
   flex-direction: column;
@@ -185,6 +187,7 @@ h1 {
 }
 .viewport-toolbar {
   min-height: 58px;
+  flex-wrap: wrap;
   flex-shrink: 0;
   padding: 12px 18px;
   display: flex;
@@ -195,6 +198,8 @@ h1 {
 }
 .viewport-toolbar div {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 7px;
 }
 .viewport-toolbar button {
@@ -271,12 +276,6 @@ canvas {
   border-radius: 8px;
   color: var(--accent);
 }
-.timeline {
-  flex-shrink: 0;
-  padding: 14px 18px 16px;
-  border-top: 1px solid var(--border);
-  background: #1d232b;
-}
 .control-heading {
   display: flex;
   align-items: center;
@@ -287,14 +286,6 @@ canvas {
   font-variant-numeric: tabular-nums;
   color: var(--accent);
   font-size: 12px;
-}
-.progress-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.progress-row input {
-  margin-top: 14px;
 }
 aside {
   min-height: 0;
@@ -504,6 +495,14 @@ details li {
     grid-template-columns: 1fr 1fr;
     border-left: 0;
     border-top: 1px solid var(--border);
+  }
+  .main.inspector-collapsed .viewport-panel {
+    flex: 1;
+    min-height: 320px;
+  }
+  .main.inspector-collapsed #viewport {
+    height: auto;
+    flex: 1;
   }
   .inspector-section:last-child {
     grid-column: 1/-1;

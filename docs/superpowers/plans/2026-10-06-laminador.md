@@ -1,5 +1,7 @@
 # Laminador 3MF — plan de implementación
 
+> Documento histórico del diseño y plan iniciales del 6 de octubre de 2026. Sus referencias al progreso de trayectorias y a verificaciones pendientes describen esa etapa. La barra de recorrido y la animación se eliminaron posteriormente; el visor actual carga el modelo completo y permite plegar los paneles. Consulta el [README actual](../../../README.md) y el [estado de verificación](../../testing.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Entregar una primera prueba de laminado 3MF con Bambu Studio y visor 3D interactivo con consumo y tiempos dentro de una interfaz MCP App.

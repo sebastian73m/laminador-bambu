@@ -55,9 +55,29 @@ Lamina mi-proyecto.3mf con sus perfiles incorporados y abre la vista previa cuan
 
 Si la interfaz no aparece pero las herramientas funcionan, comprueba el soporte MCP Apps del host, el recurso `ui://laminador/preview.html`, los metadatos de `open_preview` y reinicia/refresca la conexión. También se incluyen metadatos y un puente de compatibilidad para el widget de OpenAI; este puente no se ha probado en ChatGPT real.
 
+## Uso del visor
+
+La carga muestra el laminado completo, sin reproducción animada ni barra de recorrido. El área 3D se adapta al espacio disponible: el host decide el tamaño del panel y si admite ampliarlo. Para revisar cordones paralelos, elige la capa superior, activa **Solo la capa seleccionada**, pulsa **Vista superior** y acerca con la rueda. Puedes rotar, desplazar, encuadrar y filtrar tipos de trayectoria, desplazamientos, preparación y costuras.
+
+**Proyecto ▴/▾** pliega/despliega el área superior (cabecera y controles del proyecto). **Datos ▸/◂** hace lo mismo con estadísticas y filtros. Ambos botones están en la barra del visor y permanecen accesibles cuando los paneles están ocultos; también funcionan con Enter y Espacio. No se pierde la vista ni se reinicia el zoom al plegarlos. Los paneles están desplegados al abrir una página nueva; su estado no se guarda como preferencia permanente.
+
+Los cordones son redondeados y las costuras inferidas aparecen en blanco. Consulta [las capturas y controles](../README.md#explorar-el-laminado) y [los límites de detección de costuras](engine.md#cordones-y-costuras).
+
+## Cambiar un proyecto dentro de la misma conversación
+
+Después de modificar el proyecto, inicia otro `slice_project`, consulta su nuevo identificador con `job_status` y abre ese resultado con `open_preview(jobId)`. No reutilices el identificador de un trabajo anterior. Para un archivo que ya contiene G-code, `open_preview(project)` vuelve a leerlo aunque conserve el nombre; editar solo el modelo no genera trayectorias nuevas hasta volver a laminar.
+
+Cuando el host entrega el nuevo resultado al mismo visor, se actualizan geometría, capas, tiempos, filamento y costuras. El listener se registra antes de la carga inicial y las respuestas tardías de operaciones reemplazadas no sobrescriben la vista más reciente. Dejar de seguir el trabajo anterior en el visor no cancela su laminado; usa `cancel_job` si necesitas cancelarlo.
+
+## Reabrir el navegador lateral
+
+Si ocultaste los datos con **Datos ▸**, vuelve a desplegarlos con **Datos ◂**. Si el panel conserva las estadísticas pero el área 3D queda vacía, el código actual solicita un redibujado al volver a mostrarse o restaurarse el contexto WebGL. También conserva la escena si el navegador guarda la página para recuperarla después. Una página nueva o una sesión reiniciada necesita recibir/abrir de nuevo el resultado; la recuperación gráfica no restaura identificadores caducados del servidor.
+
+Estas correcciones están incluidas en la versión 0.1.3. Se verificaron con Chromium y un bridge de prueba; todavía requieren comprobación en ChatGPT real. Si usas Docker, [reconstruye el servicio desde el checkout que contiene los cambios](docker.md#actualizar-el-servicio-y-el-visor) antes de probarlos: reiniciar la imagen anterior no los incorpora.
+
 ## Datos, descarga y límites
 
-La interfaz pide segmentos por bloques y usa geometría instanciada para la extrusión. Hay filtros por capa/tipo de trayectoria, colores por filamento o velocidad y control manual del recorrido. El servicio conserva hasta tres vistas en memoria; abrir otra puede caducar una vista anterior. Vuelve a abrirla si recibes ese aviso.
+La interfaz pide hasta cuatro bloques de 4.000 segmentos en paralelo, mantiene el orden del G-code y usa geometría instanciada para la extrusión. Los tiempos y consumos proceden del resultado del motor, no de la duración de la carga del visor. El servicio conserva hasta tres vistas en memoria y elimina la menos recientemente usada; abrir o leer una vista actualiza su recencia. Si caduca, vuelve a abrir el proyecto o el resultado en la misma sesión del servicio.
 
 Los resultados nuevos tienen el botón **Descargar 3MF laminado**. Usa bloques MCP para reconstruir el archivo. La descarga final depende de que el host permita descargas desde su interfaz; siempre existe una copia en JOBS_DIR/<jobId>/result.3mf. Un 3MF abierto desde el disco conserva su archivo original.
 
