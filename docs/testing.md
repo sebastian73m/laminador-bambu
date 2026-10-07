@@ -1,6 +1,6 @@
 # Verificación de la versión 0.1.2
 
-La carga pide hasta cuatro bloques de 4.000 trayectorias en paralelo, conserva el orden del G-code y construye/filtra la geometría una sola vez. El modelo se muestra completo al finalizar; la reproducción se inicia únicamente al pulsar su botón. La interfaz ocupa todo el ancho y alto disponibles, con desplazamiento propio del inspector. En ventanas estrechas los controles siguen accesibles mediante desplazamiento.
+La carga pide hasta cuatro bloques de 4.000 trayectorias en paralelo, conserva el orden del G-code y construye/filtra la geometría una sola vez. El modelo se muestra completo al finalizar; el recorrido puede ajustarse manualmente, sin reproducción animada. La interfaz ocupa todo el ancho y alto disponibles, con desplazamiento propio del inspector. En ventanas estrechas los controles siguen accesibles mediante desplazamiento.
 
 Verificado en Linux el 6 de octubre de 2026: TypeScript, compilación, formato, 48 pruebas del servidor (una prueba de motor nativo omitida) y cinco pruebas Chromium. La nueva regresión bloquea el primer bloque para comprobar concurrencia y ocultación del modelo parcial, confirma inicio al 100% sin reproducción y verifica el ajuste a 1280×720 y 1800×1080. La prueba MCP compara las dimensiones del área 3D con el navegador cuando el iframe tiene el mismo tamaño. El tamaño máximo del plugin sigue dependiendo del espacio que conceda el host; no se ha verificado este cambio dentro de ChatGPT Desktop real. Estas optimizaciones aceleran la carga de la vista previa; no modifican el tiempo que necesita Bambu para laminar.
 
@@ -80,7 +80,7 @@ Las capturas de la demostración y del resultado real se inspeccionaron visualme
 - No se compiló Bambu Studio C++ desde cero. Se inspeccionaron sus scripts y se entregaron adaptadores para la revisión fijada; se verificó el binario oficial de esa revisión.
 - Descargas y pantalla completa dentro de ChatGPT dependen de los permisos del host. La descarga local se probó.
 - La vista no emula el firmware, el homing ni todas las rutinas propietarias de preparación/calibración. Se muestran avisos de comandos geométricos no representados. El cubo y el ejemplo sintético no prueban todos los proyectos multicolor, múltiples boquillas o placas grandes.
-- La reproducción expresa avance por segmentos, no tiempo físico transcurrido. Los tiempos mostrados son las estimaciones del motor.
+- El control manual del recorrido expresa avance por segmentos, no tiempo físico transcurrido. Los tiempos mostrados son las estimaciones del motor.
 - El límite de geometría es configurable; en proyectos grandes se debe observar memoria y rendimiento. El analizador usa memoria local y no es un servicio multitenant.
 
 ## Decisiones de implementación

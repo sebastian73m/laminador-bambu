@@ -57,7 +57,7 @@ Si la interfaz no aparece pero las herramientas funcionan, comprueba el soporte 
 
 ## Datos, descarga y límites
 
-La interfaz pide segmentos por bloques y usa geometría instanciada para la extrusión. Hay filtros por capa/tipo de trayectoria, colores por filamento o velocidad y reproducción progresiva. El servicio conserva hasta tres vistas en memoria; abrir otra puede caducar una vista anterior. Vuelve a abrirla si recibes ese aviso.
+La interfaz pide segmentos por bloques y usa geometría instanciada para la extrusión. Hay filtros por capa/tipo de trayectoria, colores por filamento o velocidad y control manual del recorrido. El servicio conserva hasta tres vistas en memoria; abrir otra puede caducar una vista anterior. Vuelve a abrirla si recibes ese aviso.
 
 Los resultados nuevos tienen el botón **Descargar 3MF laminado**. Usa bloques MCP para reconstruir el archivo. La descarga final depende de que el host permita descargas desde su interfaz; siempre existe una copia en JOBS_DIR/<jobId>/result.3mf. Un 3MF abierto desde el disco conserva su archivo original.
 

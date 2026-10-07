@@ -293,11 +293,6 @@ canvas {
   align-items: center;
   gap: 12px;
 }
-.progress-row button {
-  padding: 5px 9px;
-  margin-top: 6px;
-  min-width: 32px;
-}
 .progress-row input {
   margin-top: 14px;
 }

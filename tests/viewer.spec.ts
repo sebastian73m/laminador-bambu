@@ -159,10 +159,7 @@ test("loads ordered chunks concurrently and shows the complete preview at once",
   await expect(page.locator("#status")).toContainText("trayectorias cargadas");
   await expect(page.locator("canvas")).toBeVisible();
   await expect(page.locator("#progress")).toHaveValue("100");
-  await expect(page.locator("#play")).toHaveAttribute(
-    "aria-label",
-    "Reproducir trayectorias",
-  );
+  await expect(page.locator("#play")).toHaveCount(0);
   const heights: number[] = [];
   for (const size of [
     { width: 1280, height: 720 },

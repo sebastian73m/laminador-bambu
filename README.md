@@ -2,7 +2,7 @@
 
 [![AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
-Plugin MCP con un visor 3D de trayectorias de impresión. Lamina proyectos 3MF usando Bambu Studio local y muestra capas, extrusión, desplazamientos, tiempos estimados y consumo de filamento. El visor permite rotación, zoom, desplazamiento y reproducción progresiva.
+Plugin MCP con un visor 3D de trayectorias de impresión. Lamina proyectos 3MF usando Bambu Studio local y muestra capas, extrusión, desplazamientos, tiempos estimados y consumo de filamento. El visor permite rotación, zoom, desplazamiento y control manual del recorrido.
 
 Primera versión de prueba para Windows y Linux. La navegación es una simulación propia; las trayectorias y estadísticas de un laminado real proceden de Bambu Studio.
 

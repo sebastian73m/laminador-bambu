@@ -24,9 +24,7 @@ let scene: ToolpathScene | undefined,
   plate: PlateSummary | undefined,
   loadVersion = 0,
   jobId: string | undefined,
-  pollVersion = 0,
-  playing = false,
-  playFrame = 0;
+  pollVersion = 0;
 const hiddenRoles = new Set<string>();
 let roles = new Set<string>();
 const local = window.parent === window;
@@ -208,16 +206,9 @@ function warnings(messages: string[]) {
     }),
   );
 }
-function pause() {
-  playing = false;
-  cancelAnimationFrame(playFrame);
-  el("play").textContent = "▶";
-  el("play").setAttribute("aria-label", "Reproducir trayectorias");
-}
 async function loadPlate(id: number) {
   if (!current) return;
   const version = ++loadVersion;
-  pause();
   plate = current.plates.find((p) => p.id === id);
   if (!plate) throw Error("Placa no encontrada");
   if (!scene) scene = new ToolpathScene(el("viewport"));
@@ -389,28 +380,6 @@ select("color-mode").addEventListener("change", () => {
   el("speed-legend").hidden = select("color-mode").value !== "speed";
   update();
 });
-on("play", () => {
-  if (!plate || input("progress").disabled) return;
-  if (playing) {
-    pause();
-    return;
-  }
-  playing = true;
-  if (Number(input("progress").value) >= 100) input("progress").value = "0";
-  el("play").textContent = "Ⅱ";
-  el("play").setAttribute("aria-label", "Pausar trayectorias");
-  let last = performance.now();
-  const step = (now: number) => {
-    if (!playing) return;
-    const p = Number(input("progress").value) + (now - last) / 250;
-    last = now;
-    input("progress").value = String(Math.min(100, p));
-    update();
-    if (p >= 100) pause();
-    else playFrame = requestAnimationFrame(step);
-  };
-  playFrame = requestAnimationFrame(step);
-});
 on("download", async () => {
   if (!current?.jobId) return;
   status("Preparando descarga del 3MF…");
@@ -512,7 +481,6 @@ async function init() {
   }
 }
 window.addEventListener("pagehide", () => {
-  pause();
   ++loadVersion;
   ++pollVersion;
   scene?.dispose();
